@@ -14,7 +14,7 @@ The code under [partial-persistence](./partial-persistence) is based on lectures
 
 ## ACM Coding Challenges
 
-Solutions for the 2007 ACM Coding Challenges can be found in [acm/2007](../acm/2007).
+Solutions for 2007 ACM Coding Challenges can be found in [acm-2007](./acm-2007).
 
 ## Miscellaneous
 
