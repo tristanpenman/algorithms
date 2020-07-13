@@ -6,6 +6,15 @@ This repo contains implementations of various algorithms and data structures, pr
 
 This repo also contains solutions for coding interview questions, mostly written in Java. Most of these questions were taken from the book [Cracking the Coding Interview](http://www.crackingthecodinginterview.com/). Some were based on real interview questions.
 
+Questions from the book can be found in [coding-interview-book](./coding-interview-book). Real interview questions can be found in [real-interviews](./real-interviews).
+
 ## Advanced Data Structures
 
 The code under [partial-persistence](./partial-persistence) is based on lectures from MIT's [Advanced Data Structures](https://courses.csail.mit.edu/6.851/spring14/lectures/) course, delivered by Prof. Erik Demaine.
+
+## Experiments
+
+Some of these are just my own random experiments, e.g:
+
+* [Hash Tables](./hash-tables)
+* [Heaps](./heaps)
