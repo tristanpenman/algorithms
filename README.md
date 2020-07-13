@@ -8,11 +8,15 @@ This repo also contains solutions for coding interview questions, mostly written
 
 Questions from the book can be found in [coding-interview-book](./coding-interview-book). Real interview questions can be found in [real-interviews](./real-interviews).
 
-## Advanced Data Structures
+## Partial Persistence
 
 The code under [partial-persistence](./partial-persistence) is based on lectures from MIT's [Advanced Data Structures](https://courses.csail.mit.edu/6.851/spring14/lectures/) course, delivered by Prof. Erik Demaine.
 
-## Experiments
+## ACM Coding Challenges
+
+Solutions for the 2007 ACM Coding Challenges can be found in [acm/2007](../acm/2007).
+
+## Miscellaneous
 
 Some of these are just my own random experiments, e.g:
 
