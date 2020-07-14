@@ -1,24 +1,25 @@
 # Algorithms, Data Structures, etc.
 
-This repo contains implementations of various algorithms and data structures, primarily written in C++ and Ruby.
+This repo contains implementations of various algorithms and data structures, mostly written in C++, Java, Ruby and Python. There are solutions for various interview questions, as well as some experimental code that I wrote to internalise concepts.
 
 ## Coding Interview Questions
 
-This repo also contains solutions for coding interview questions, mostly written in Java. Most of these questions were taken from the book [Cracking the Coding Interview](http://www.crackingthecodinginterview.com/). Some were based on real interview questions.
+In [coding-interview-book](./coding-interview-book) you'll find solutions for coding interview questions from the book [Cracking the Coding Interview](http://www.crackingthecodinginterview.com/). These are all written in Java.
 
-Questions from the book can be found in [coding-interview-book](./coding-interview-book). Real interview questions can be found in [real-interviews](./real-interviews).
+Solutions for real interview questions can be found in [real-interviews](./real-interviews). These are all written in C++.
 
 ## Partial Persistence
 
-The code under [partial-persistence](./partial-persistence) is based on lectures from MIT's [Advanced Data Structures](https://courses.csail.mit.edu/6.851/spring14/lectures/) course, delivered by Prof. Erik Demaine.
+Under [partial-persistence](./partial-persistence) you'll find a Ruby implementation of a partially persistent tree, based on lectures from MIT's course on [Advanced Data Structures](https://courses.csail.mit.edu/6.851/spring14/lectures/). There is also an incomplete C++ implementation, used mostly for reference.
 
 ## ACM Coding Challenges
 
-Solutions for 2007 ACM Coding Challenges can be found in [acm-2007](./acm-2007).
+Solutions for the 2007 ACM Coding Challenges can be found in [acm-2007](./acm-2007). These are all written in Python. They may not be compatible with Python 3...
 
 ## Miscellaneous
 
-Some of these are just my own random experiments, e.g:
+Finally, there are various experiments, grouped by the kind of algorithm or data structure that I was learning about:
 
 * [Hash Tables](./hash-tables)
 * [Heaps](./heaps)
+* [Sorting](./sorting)
