@@ -16,6 +16,10 @@ Under [partial-persistence](./partial-persistence) you'll find a Ruby implementa
 
 Solutions for the 2007 ACM Coding Challenges can be found in [acm-2007](./acm-2007). These are all written in Python. They may not be compatible with Python 3...
 
+## Introduction to Algorithms
+
+Some algorithms based on pseudocode from [Introduction to Algorithms](https://mitpress.mit.edu/books/introduction-algorithms-third-edition) (aka CLRS) can be found in [intro-to-algorithms](./intro-to-algorithms).
+
 ## Miscellaneous
 
 Finally, there are various experiments, grouped by the kind of algorithm or data structure that I was learning about:
