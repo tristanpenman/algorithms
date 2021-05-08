@@ -10,12 +10,11 @@ class Point2DSet
 
   PointVector fPoints;
 
-  // helper function to check if a new point forms a right turn with the existing points
-  // in a set, relative to a particular origin point
-  bool doesNotTurnLeft(const Point2D& aOrigin, const Point2D& aPoint) const;
+  // helper function to check if a new point forms a right turn with existing points in the set
+  bool doesNotTurnLeft(const Point2D& aPoint) const;
 
 public:
-  using Iterator = std::vector<Point2D>::const_iterator;
+  using Iterator = PointVector::const_iterator;
 
   const Point2D& operator[](size_t aIndex) const;
 
@@ -32,7 +31,7 @@ public:
   void buildConvexHull(Point2DSet& aConvexHull);
 };
 
-inline bool Point2DSet::doesNotTurnLeft(const Point2D& aOrigin, const Point2D& aPoint) const
+inline bool Point2DSet::doesNotTurnLeft(const Point2D& aPoint) const
 {
   const Point2D& lastPoint = fPoints[size() - 1];
   const Point2D& secondLastPoint = fPoints[size() - 2];
@@ -108,7 +107,7 @@ inline void Point2DSet::buildConvexHull(Point2DSet& aConvexHull)
 
   for (const auto& fPoint : fPoints) {
     // remove existing points that are contained by new point
-    while (aConvexHull.size() > 1 && aConvexHull.doesNotTurnLeft(lOrigin, fPoint)) {
+    while (aConvexHull.size() > 1 && aConvexHull.doesNotTurnLeft(fPoint)) {
       aConvexHull.removeLast();
     }
 

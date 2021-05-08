@@ -11,7 +11,6 @@ public:
   Vector2D() = default;
   Vector2D(double aX, double aY);
 
-  Vector2D operator+(const Vector2D& aRHS) const;
   Vector2D operator-(const Vector2D& aRHS) const;
 
   double getX() const;
@@ -23,7 +22,6 @@ public:
   double cross(const Vector2D& aRHS) const;
   double dot(const Vector2D& aRHS) const;
 
-  double angleBetween(const Vector2D& aRHS) const;
   double direction() const;
   double magnitude() const;
 };
@@ -32,11 +30,6 @@ inline Vector2D::Vector2D(double aX, double aY)
   : fX(aX)
   , fY(aY)
 {
-}
-
-inline Vector2D Vector2D::operator+(const Vector2D& aRHS) const
-{
-  return Vector2D(fX + aRHS.fX, fY + aRHS.fY);
 }
 
 inline Vector2D Vector2D::operator-(const Vector2D& aRHS) const
@@ -72,11 +65,6 @@ inline double Vector2D::cross(const Vector2D& aRHS) const
 inline double Vector2D::dot(const Vector2D& aRHS) const
 {
   return fX * aRHS.fX + fY * aRHS.fY;
-}
-
-inline double Vector2D::angleBetween(const Vector2D& aRHS) const
-{
-  return std::atan2(fY - aRHS.fY, fX - aRHS.fX);
 }
 
 inline double Vector2D::direction() const

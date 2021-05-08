@@ -14,7 +14,6 @@ public:
   Point2D(const std::string& aId, double aX, double aY);
 
   Vector2D operator-(const Point2D& aRHS) const;
-  bool operator<(const Point2D& aRHS) const;
 
   const std::string& getId() const;
   void setId(const std::string& aId);
