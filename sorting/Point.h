@@ -1,5 +1,4 @@
-#ifndef POINT_H
-#define POINT_H
+#pragma once
 
 struct Point {
   Point(int x, int y);
@@ -47,5 +46,3 @@ inline Point Point::operator/(float f) const {
 inline bool Point::operator<=(const Point& rhs) const {
   return (x == rhs.x && y <= rhs.y) || x <= rhs.x;
 }
-
-#endif

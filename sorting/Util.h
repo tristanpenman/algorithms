@@ -1,5 +1,4 @@
-#ifndef UTIL_H
-#define UTIL_H
+#pragma once
 
 #include <iostream>
 #include <sstream>
@@ -37,10 +36,8 @@ std::string streamArray(T* a, unsigned int left, unsigned int right) {
 
 }
 
-// Allow a TPPoint object to be written to an output stream
+// Allow a Point object to be written to an output stream
 inline std::ostream& operator<<(std::ostream &o, const Point &p) {
   o << "[" << p.x << ", " << p.y << "]";
   return o;
 }
-
-#endif

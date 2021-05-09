@@ -1,5 +1,4 @@
-#ifndef CLOSEST_PAIR_H
-#define CLOSEST_PAIR_H
+#pragma once
 
 #include <cmath>
 #include <utility>
@@ -103,6 +102,4 @@ std::pair<int, int> findClosestPair(T* a, int left, int right) {
   return shortest;
 }
 
-}
-
-#endif
+} // end namespace ClosestPair

@@ -18,7 +18,11 @@ Solutions for the 2007 ACM Coding Challenges can be found in [acm-2007](./acm-20
 
 ## Introduction to Algorithms
 
-Some algorithms based on pseudocode from [Introduction to Algorithms](https://mitpress.mit.edu/books/introduction-algorithms-third-edition) (aka CLRS) can be found in [intro-to-algorithms](./intro-to-algorithms).
+Some algorithms based on pseudocode from the book [Introduction to Algorithms](https://mitpress.mit.edu/books/introduction-algorithms-third-edition) (aka CLRS) can be found in [intro-to-algorithms](./intro-to-algorithms).
+
+## Computational Geometry
+
+Algorithms based on pseudocode from the book [Computational Geometry](https://www.springer.com/gp/book/9783540779735) can be found in [computational-geometry](./computational-geometry).
 
 ## Miscellaneous
 

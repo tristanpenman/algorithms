@@ -1,5 +1,4 @@
-#ifndef QUICKSORT_H
-#define QUICKSORT_H
+#pragma once
 
 namespace Quicksort {
 
@@ -53,6 +52,4 @@ void sort(T* a, int left, int right, bool(*lessThanOrEqual)(T, T)) {
   }
 }
 
-}
-
-#endif
+} // end namespace Quicksort
