@@ -7,19 +7,26 @@ module Inference
     end
 
     def ask(kb, query)
-      @working_set = kb.facts.clone
+      @working_set = []
 
-      traverse(kb.rules, [query])
+      traverse(kb.facts, kb.rules, [query])
     end
 
     private
 
-    def traverse(rules, queries)
+    def traverse(facts, rules, queries)
       queries.all? do |query|
-        @working_set.include?(query) || rules.one? do |rule|
-          if rule.consequent == query && traverse(rules, rule.antecedents)
-            @working_set << query
-            true
+        if @working_set.include?(query)
+          true
+        elsif facts.include?(query)
+          @working_set << query
+          true
+        else
+          rules.one? do |rule|
+            if rule.consequent == query && traverse(facts, rules, rule.antecedents)
+              @working_set << query
+              true
+            end
           end
         end
       end
