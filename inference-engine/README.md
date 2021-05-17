@@ -6,8 +6,6 @@ A small Ruby implementation of an inference engine, using three algorithms:
 * Forward Chaining (FC)
 * Truth Table Checking (TT)
 
-TODO: Truth Table Checking has not yet been implemented...
-
 ## IEngine
 
 A small test program has been included, which can be started like so:

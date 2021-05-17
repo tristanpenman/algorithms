@@ -13,7 +13,7 @@ rescue StandardError => e
   puts 'Usage:'
   puts ' iengine <ALG> [file]'
   puts ''
-  puts "Valid values for <ALG> are: #{Inference::Engine::ALGS.keys.join(', ')}"
+  puts "Valid values for <ALG> are: #{Inference::Engine::ALGORITHMS.keys.join(', ')}"
   puts ''
   puts '[file] is an optional path to an input file. Default is to read from STDIN.'
   exit

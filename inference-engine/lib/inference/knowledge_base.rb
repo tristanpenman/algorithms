@@ -1,4 +1,4 @@
-require_relative './rule.rb'
+require_relative 'rule'
 
 module Inference
   class KnowledgeBase

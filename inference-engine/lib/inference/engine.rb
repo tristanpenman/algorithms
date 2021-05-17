@@ -1,14 +1,14 @@
-require_relative './backward_chaining'
-require_relative './forward_chaining'
-require_relative './knowledge_base'
-require_relative './truth_tables'
+require_relative 'backward_chaining'
+require_relative 'forward_chaining'
+require_relative 'knowledge_base'
+require_relative 'truth_table'
 
 module Inference
   class Engine
-    ALGS = {
+    ALGORITHMS = {
       BC: BackwardChaining,
       FC: ForwardChaining,
-      TT: TruthTables
+      TT: TruthTable
     }.freeze
 
     def initialize(alg)
@@ -39,16 +39,18 @@ module Inference
     private
 
     def algorithm(alg)
-      cls = ALGS[alg&.to_sym]
+      cls = ALGORITHMS[alg&.to_sym]
       raise 'Missing or invalid algorithm.' unless cls
       cls.new
     end
 
     def ask(statement)
-      if @alg.ask(@kb, statement)
+      return 'NO' unless @alg.ask(@kb, statement)
+
+      if @alg.respond_to?(:working_set)
         "YES: #{@alg.working_set.join(', ')}"
       else
-        'NO'
+        "YES: #{@alg.models.length}"
       end
     end
 
@@ -59,7 +61,7 @@ module Inference
       when :tell
         @kb.tell(statement)
       else
-        raise 'Invalid mode. Statements can only be executed once a mode has been selected.'
+        raise 'Statements can only be executed once a mode (ASK or TELL) has been activated.'
       end
     end
 
