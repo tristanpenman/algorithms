@@ -23,7 +23,7 @@ module Inference
           true
         else
           rules.one? do |rule|
-            if rule.consequent == query && traverse(facts, rules, rule.antecedents)
+            if rule.consequent == query && traverse(facts, rules - [rule], rule.antecedents)
               @working_set << query
               true
             end
