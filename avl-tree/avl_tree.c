@@ -1,5 +1,7 @@
 #include "avl_tree.h"
 
+#define AVL_HEIGHT_LIMIT 20
+
 // ----------------------------------------------------------------------------
 //
 // Rotation macros
@@ -52,6 +54,24 @@
     AVL_ADJUST_BALANCE(root_ptr, dir, bal);       \
     AVL_DOUBLE_ROTATION(root_ptr, !dir);          \
   }                                               \
+} while (0)
+
+// re-balance after deletion
+#define AVL_REMOVE_REBALANCE(root_ptr, dir, done) do { \
+  avl_tree_node_t* n = root_ptr->child_ptrs[!dir];     \
+  int bal = dir == 0 ? -1 : +1;                        \
+  if (n->balance == -bal) {                            \
+    root_ptr->balance = n->balance = 0;                \
+    AVL_SINGLE_ROTATION(root_ptr, dir);                \
+  } else if (n->balance == bal) {                      \
+    AVL_ADJUST_BALANCE(root_ptr, !dir, -bal);          \
+    AVL_DOUBLE_ROTATION(root_ptr, dir);                \
+  } else {                                             \
+    root_ptr->balance = -bal;                          \
+    n->balance = bal;                                  \
+    AVL_SINGLE_ROTATION(root_ptr, dir);                \
+    done = 1;                                          \
+  }                                                    \
 } while (0)
 
 // ----------------------------------------------------------------------------
@@ -209,6 +229,8 @@ static bool avl_tree_insert_nonempty(avl_tree_ptr_t tree_ptr, void *data_ptr) {
     t->child_ptrs[0] = s;
   }
 
+  tree_ptr->size++;
+
   return true;
 }
 
@@ -227,6 +249,7 @@ avl_tree_ptr_t avl_tree_create(const avl_tree_callbacks_t *callbacks_ptr, void *
 
   tree_ptr->callbacks_ptr = callbacks_ptr;
   tree_ptr->root_ptr = NULL;
+  tree_ptr->size = 0;
   tree_ptr->user_ptr = user_ptr;
 
   return tree_ptr;
@@ -254,6 +277,103 @@ void *avl_tree_find(avl_tree_ptr_t tree_ptr, void *query_ptr) {
       break;
     }
   }
+
+  return node_ptr->data_ptr;
+}
+
+void *avl_tree_remove(avl_tree_ptr_t tree_ptr, void *query_ptr) {
+  if (tree_ptr->root_ptr == NULL) {
+    return NULL;
+  }
+
+  avl_tree_node_t *node_ptr = tree_ptr->root_ptr;
+
+  avl_tree_node_t *up[AVL_HEIGHT_LIMIT];
+  int upd[AVL_HEIGHT_LIMIT];
+  int top = 0;
+  int done = 0;
+
+  // Search down tree and save path
+  while (1) {
+    if (node_ptr == NULL) {
+      return NULL;
+    }
+
+    bool less_than = tree_ptr->callbacks_ptr->compare_fn(node_ptr->data_ptr, query_ptr, tree_ptr->user_ptr);
+    if (!less_than) {
+      bool greater_than = tree_ptr->callbacks_ptr->compare_fn(query_ptr, node_ptr->data_ptr, tree_ptr->user_ptr);
+      if (!greater_than) {
+        break;
+      }
+    }
+
+    upd[top] = less_than;
+    up[top++] = node_ptr;
+
+    node_ptr = node_ptr->child_ptrs[upd[top - 1]];
+  }
+
+  // remove the node
+  if (node_ptr->child_ptrs[0] == NULL || node_ptr->child_ptrs[1] == NULL) {
+    // which child is not null
+    int dir = node_ptr->child_ptrs[0] == NULL;
+
+    // fix parent
+    if (top == 0) {
+      tree_ptr->root_ptr = node_ptr->child_ptrs[dir];
+    } else {
+      up[top - 1]->child_ptrs[upd[top - 1]] = node_ptr->child_ptrs[dir];
+    }
+
+    // destroy node
+    tree_ptr->callbacks_ptr->free_fn(node_ptr);
+
+  } else {
+    // find the in-order successor
+    avl_tree_node_t *heir = node_ptr->child_ptrs[1];
+
+    // save this path too
+    upd[top] = 1;
+    up[top++] = node_ptr;
+
+    while (heir->child_ptrs[0] != NULL) {
+      upd[top] = 0;
+      up[top++] = heir;
+      heir = heir->child_ptrs[0];
+    }
+
+    // swap node contents
+    void *save = node_ptr->data_ptr;
+    node_ptr->data_ptr = heir->data_ptr;
+    heir->data_ptr = save;
+
+    // unchild successor and fix parents
+    up[top - 1]->child_ptrs[up[top - 1] == node_ptr] = heir->child_ptrs[1];
+
+    // destroy
+    tree_ptr->callbacks_ptr->free_fn(heir);
+  }
+
+  // walk back up the search path
+  while (--top >= 0 && !done) {
+    // update balance factors
+    up[top]->balance += upd[top] != 0 ? -1 : +1;
+
+    // terminate or re-balance as necessary
+    if (up[top]->balance == -1 || up[top]->balance == 1) {
+      break;
+    } else if (up[top]->balance < -1 || up[top]->balance > -1) {
+      AVL_REMOVE_REBALANCE(up[top], upd[top], done);
+
+      if (top == 0) {
+        tree_ptr->root_ptr = up[0];
+      } else {
+        up[top - 1]->child_ptrs[upd[top - 1]] = up[top];
+      }
+    }
+  }
+
+  tree_ptr->size--;
 
   return node_ptr->data_ptr;
 }

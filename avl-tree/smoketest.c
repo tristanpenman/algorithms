@@ -67,6 +67,11 @@ int main(int argc, char **argv) {
     avl_tree_print(tree_ptr, print);
   }
 
+  // check size
+  size_t size = avl_tree_size(tree_ptr);
+  printf("SIZE: %zul\n", size);
+  assert(size == 7);
+
   // query the tree for some data
   data_t query = {10, 0};
   void *result = avl_tree_find(tree_ptr, &query);
@@ -82,8 +87,21 @@ int main(int argc, char **argv) {
     printf("NOT FOUND: %d\n", query.key);
   }
 
-  avl_tree_clear(tree_ptr);
+  // remove the same node
+  data_t *removed_ptr = avl_tree_remove(tree_ptr, &query);
+  assert(removed_ptr);
+  printf("REMOVED: %d, %d\n", removed_ptr->key, removed_ptr->value);
+  assert(removed_ptr->key == 10);
+  assert(removed_ptr->value == 1000);
+  free(removed_ptr);
 
+  // check size again
+  size = avl_tree_size(tree_ptr);
+  printf("SIZE: %zul\n", size);
+  assert(size == 6);
+
+  // remove all elements in the tree
+  avl_tree_clear(tree_ptr);
   printf("CLEARED\n");
   avl_tree_print(tree_ptr, print);
 

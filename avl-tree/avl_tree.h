@@ -28,8 +28,7 @@ typedef bool (*avl_tree_apply_fn_t)(void *data_ptr, void *user_ptr);
 
 // convenience data structure
 // allows callbacks to be swapped out dynamically
-typedef struct
-{
+typedef struct {
   avl_tree_malloc_fn_t malloc_fn;
   avl_tree_free_fn_t free_fn;
   avl_tree_compare_fn_t compare_fn;
@@ -58,6 +57,9 @@ bool avl_tree_insert(avl_tree_ptr_t, void *data_ptr);
 // attempts to find data in the tree, using a query
 // returns data pointer if found, NULL otherwise
 void *avl_tree_find(avl_tree_ptr_t, void *query_ptr);
+
+// remove and return the data that matches a particular query
+void *avl_tree_remove(avl_tree_ptr_t, void *query_ptr);
 
 // return the number of nodes in the tree
 size_t avl_tree_size(avl_tree_ptr_t);
