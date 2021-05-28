@@ -24,6 +24,10 @@ Some algorithms based on pseudocode from the book [Introduction to Algorithms](h
 
 Algorithms based on pseudocode from the book [Computational Geometry](https://www.springer.com/gp/book/9783540779735) can be found in [computational-geometry](./computational-geometry).
 
+## AVL Tree
+
+In [avl-tree](./avl-tree) you'll find C code for an AVL tree implementation that I extracted from an old project. The original code was much more complicated, because it employed mutexes to allow usage in a multi-threaded environment. The new code has been simplified, and all concurrency-related logic has been removed.
+
 ## Miscellaneous
 
 Finally, there are various experiments, grouped by the kind of algorithm or data structure that I was learning about:
