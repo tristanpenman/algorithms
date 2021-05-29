@@ -490,16 +490,10 @@ avl_tree_iterator_ptr_t avl_tree_find_iterator(avl_tree_ptr_t tree_ptr, void *qu
       // query is < node, want to go left
       itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
       node_ptr = node_ptr->child_ptrs[0];
-//      if (itr_ptr->up == -1) {
-//        itr_ptr->up = 1;
-//      }
     } else if (tree_ptr->callbacks_ptr->compare_fn(node_ptr->data_ptr, query_ptr, tree_ptr->user_ptr)) {
       // query is > node, want to go right
       itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
       node_ptr = node_ptr->child_ptrs[1];
-//      if (itr_ptr->up == -1) {
-//        itr_ptr->up = 0;
-//      }
     } else {
       // must be equal
       itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
