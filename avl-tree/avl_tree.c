@@ -105,7 +105,6 @@ typedef struct avl_tree_iterator {
   avl_tree_iterator_ptr_t next_itr_ptr;         // next iterator in linked list
   avl_tree_iterator_ptr_t prev_itr_ptr;         // previous iterator
   uint64_t nonce;                               // nonce to determine whether tree has changed
-  int side;                                     // which side of the tree are we on
 } avl_tree_iterator_t;
 
 // ----------------------------------------------------------------------------
