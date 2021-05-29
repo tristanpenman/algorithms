@@ -35,11 +35,6 @@ static void release(void *data_ptr, void *user_ptr) {
   free(data_ptr);
 }
 
-static bool apply_until_8(void *data_ptr, void *user_ptr) {
-  printf("APPLYING: %d\n", ((data_t *) data_ptr)->value);
-  return ((data_t *) data_ptr)->key != 8;
-}
-
 static const avl_tree_callbacks_t callbacks = {
     malloc,
     free,
@@ -51,16 +46,12 @@ int main(int argc, char **argv) {
   // create a tree
   avl_tree_ptr_t tree_ptr = avl_tree_create(&callbacks, NULL);
   assert(tree_ptr != NULL);
-  avl_tree_print(tree_ptr, print);
-
-  // values
-  int values[] = {1, 4, 2, 10, 8, 3, 7};
 
   // insert some data
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < 100; i++) {
     data_t *data_ptr = malloc(sizeof(data_t));
-    data_ptr->key = values[i];
-    data_ptr->value = values[i] * 100;
+    data_ptr->key = i;
+    data_ptr->value = i * 100;
     bool inserted = avl_tree_insert(tree_ptr, data_ptr);
     if (inserted) {
       printf("INSERT OK: %d, %d\n", data_ptr->key, data_ptr->value);
@@ -68,18 +59,20 @@ int main(int argc, char **argv) {
       printf("INSERT FAILED: %d, %d\n", data_ptr->key, data_ptr->value);
       free(data_ptr);
     }
-
-    avl_tree_print(tree_ptr, print);
   }
 
-  // check size
-  size_t size = avl_tree_size(tree_ptr);
-  printf("SIZE: %zu\n", size);
-  assert(size == 7);
+  avl_tree_print(tree_ptr, print);
 
   // query the tree for some data
   data_t query = {10, 0};
   void *result = avl_tree_find(tree_ptr, &query);
+  assert(result != NULL);
+
+  avl_tree_iterator_ptr_t itr_ptr = avl_tree_find_iterator(tree_ptr, &query);
+  assert(itr_ptr != NULL);
+  assert(avl_tree_iterator_valid(itr_ptr));
+
+  result = avl_tree_iterator_dereference(itr_ptr);
   assert(result != NULL);
 
   // check the data
@@ -100,20 +93,35 @@ int main(int argc, char **argv) {
   assert(removed_ptr->value == 1000);
   free(removed_ptr);
 
-  // check size again
-  size = avl_tree_size(tree_ptr);
-  printf("SIZE: %zu\n", size);
-  assert(size == 6);
+  // try to dereference the iterator again...
+  result = avl_tree_iterator_dereference(itr_ptr);
+  assert(result == NULL);
 
-  // apply function to all elements in the tree, and stop if we hit an 8
-  avl_tree_apply(tree_ptr, apply_until_8);
+  // we could also check validity directly
+  assert(!avl_tree_iterator_valid(itr_ptr));
 
-  // remove all elements in the tree
-  avl_tree_clear(tree_ptr);
-  printf("CLEARED\n");
-  avl_tree_print(tree_ptr, print);
+  // explicitly free an iterator
+  avl_tree_iterator_destroy(itr_ptr);
 
-  // cleanup
+  // forward traversal of the tree using an iterator
+  for (itr_ptr = avl_tree_iterator_leftmost(tree_ptr); avl_tree_iterator_valid(itr_ptr);
+      avl_tree_iterator_increment(itr_ptr)) {
+    result = avl_tree_iterator_dereference(itr_ptr);
+    assert(data_ptr);
+    data_ptr = (data_t *) result;
+    printf("%d, %d\n", data_ptr->key, data_ptr->value);
+  }
+
+  // backwards traversal
+  for (itr_ptr = avl_tree_iterator_rightmost(tree_ptr); avl_tree_iterator_valid(itr_ptr);
+      avl_tree_iterator_decrement(itr_ptr)) {
+    result = avl_tree_iterator_dereference(itr_ptr);
+    assert(data_ptr);
+    data_ptr = (data_t *) result;
+    printf("%d, %d\n", data_ptr->key, data_ptr->value);
+  }
+
+  // implicitly destroys any remaining iterators
   avl_tree_destroy(tree_ptr);
 
   return 0;

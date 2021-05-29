@@ -1,3 +1,6 @@
+#include <stdint.h>
+#include <string.h>
+
 #include "avl_tree.h"
 
 #define AVL_HEIGHT_LIMIT 20
@@ -91,7 +94,19 @@ typedef struct avl_tree {
   avl_tree_node_t *root_ptr;                 // root of the tree
   void *user_ptr;                            // additional user-defined data
   size_t size;                               // number of nodes in the tree
+  avl_tree_iterator_ptr_t head_itr_ptr;      // linked list of iterators
+  uint64_t nonce;                            // determines iterator validity after operations
 } avl_tree_t;
+
+typedef struct avl_tree_iterator {
+  avl_tree_ptr_t tree_ptr;                      // tree that the iterator belongs to
+  avl_tree_node_t *node_ptrs[AVL_HEIGHT_LIMIT]; // path to the node
+  int depth;                                    // depth of path
+  avl_tree_iterator_ptr_t next_itr_ptr;         // next iterator in linked list
+  avl_tree_iterator_ptr_t prev_itr_ptr;         // previous iterator
+  uint64_t nonce;                               // nonce to determine whether tree has changed
+  int side;                                     // which side of the tree are we on
+} avl_tree_iterator_t;
 
 // ----------------------------------------------------------------------------
 //
@@ -150,6 +165,7 @@ static bool avl_tree_insert_empty(avl_tree_ptr_t tree_ptr, void *data_ptr) {
   avl_tree_node_init(node_ptr, data_ptr);
   tree_ptr->root_ptr = node_ptr;
   tree_ptr->size++;
+  tree_ptr->nonce++;
 
   return true;
 }
@@ -230,8 +246,51 @@ static bool avl_tree_insert_nonempty(avl_tree_ptr_t tree_ptr, void *data_ptr) {
   }
 
   tree_ptr->size++;
+  tree_ptr->nonce++;
 
   return true;
+}
+
+// ----------------------------------------------------------------------------
+//
+// Iterator helpers
+//
+// ----------------------------------------------------------------------------
+
+void avl_tree_iterator_init(avl_tree_iterator_ptr_t itr_ptr, avl_tree_ptr_t tree_ptr) {
+  itr_ptr->tree_ptr = tree_ptr;
+  itr_ptr->depth = 0;
+  itr_ptr->nonce = tree_ptr->nonce;
+
+  // set linked list pointers
+  itr_ptr->next_itr_ptr = tree_ptr->head_itr_ptr;
+  itr_ptr->prev_itr_ptr = NULL;
+
+  // update old linked list head
+  if (tree_ptr->head_itr_ptr) {
+    tree_ptr->head_itr_ptr->prev_itr_ptr = itr_ptr;
+  }
+
+  // replace head
+  tree_ptr->head_itr_ptr = itr_ptr;
+}
+
+avl_tree_iterator_ptr_t avl_tree_iterator_dive(avl_tree_ptr_t tree_ptr, int direction) {
+  avl_tree_iterator_ptr_t itr_ptr = tree_ptr->callbacks_ptr->malloc_fn(sizeof(avl_tree_iterator_t));
+  if (itr_ptr == NULL) {
+    // error
+    return NULL;
+  }
+
+  avl_tree_iterator_init(itr_ptr, tree_ptr);
+
+  avl_tree_node_t *node_ptr = tree_ptr->root_ptr;
+  while (node_ptr != NULL) {
+    itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
+    node_ptr = node_ptr->child_ptrs[direction];
+  }
+
+  return itr_ptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -251,16 +310,16 @@ avl_tree_ptr_t avl_tree_create(const avl_tree_callbacks_t *callbacks_ptr, void *
   tree_ptr->root_ptr = NULL;
   tree_ptr->size = 0;
   tree_ptr->user_ptr = user_ptr;
+  tree_ptr->head_itr_ptr = NULL;
+  tree_ptr->nonce = 0;
 
   return tree_ptr;
 }
 
 bool avl_tree_insert(avl_tree_ptr_t tree_ptr, void *data_ptr) {
-  if (tree_ptr->root_ptr == NULL) {
-    return avl_tree_insert_empty(tree_ptr, data_ptr);
-  } else {
-    return avl_tree_insert_nonempty(tree_ptr, data_ptr);
-  }
+  return tree_ptr->root_ptr == NULL ?
+      avl_tree_insert_empty(tree_ptr, data_ptr) :
+      avl_tree_insert_nonempty(tree_ptr, data_ptr);
 }
 
 void *avl_tree_find(avl_tree_ptr_t tree_ptr, void *query_ptr) {
@@ -276,6 +335,10 @@ void *avl_tree_find(avl_tree_ptr_t tree_ptr, void *query_ptr) {
       // must be equal
       break;
     }
+  }
+
+  if (node_ptr == NULL) {
+    return NULL;
   }
 
   return node_ptr->data_ptr;
@@ -374,6 +437,7 @@ void *avl_tree_remove(avl_tree_ptr_t tree_ptr, void *query_ptr) {
   }
 
   tree_ptr->size--;
+  tree_ptr->nonce++;
 
   return node_ptr->data_ptr;
 }
@@ -392,8 +456,176 @@ void avl_tree_clear(avl_tree_ptr_t tree_ptr) {
 }
 
 void avl_tree_destroy(avl_tree_ptr_t tree_ptr) {
+  // free iterators
+  avl_tree_iterator_ptr_t itr_ptr = tree_ptr->head_itr_ptr;
+  while (itr_ptr) {
+    avl_tree_iterator_ptr_t next_itr_ptr = itr_ptr->next_itr_ptr;
+    tree_ptr->callbacks_ptr->free_fn(itr_ptr);
+    itr_ptr = next_itr_ptr;
+  }
+
+  // free tree
   avl_tree_node_destroy(tree_ptr->root_ptr, tree_ptr);
   tree_ptr->callbacks_ptr->free_fn(tree_ptr);
+}
+
+// ----------------------------------------------------------------------------
+//
+// Iterator API
+//
+// ----------------------------------------------------------------------------
+
+avl_tree_iterator_ptr_t avl_tree_find_iterator(avl_tree_ptr_t tree_ptr, void *query_ptr) {
+  avl_tree_iterator_ptr_t itr_ptr = tree_ptr->callbacks_ptr->malloc_fn(sizeof(avl_tree_iterator_t));
+  if (itr_ptr == NULL) {
+    // error
+    return NULL;
+  }
+
+  avl_tree_iterator_init(itr_ptr, tree_ptr);
+
+  avl_tree_node_t *node_ptr = tree_ptr->root_ptr;
+  while (node_ptr != NULL) {
+    if (tree_ptr->callbacks_ptr->compare_fn(query_ptr, node_ptr->data_ptr, tree_ptr->user_ptr)) {
+      // query is < node, want to go left
+      itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
+      node_ptr = node_ptr->child_ptrs[0];
+//      if (itr_ptr->up == -1) {
+//        itr_ptr->up = 1;
+//      }
+    } else if (tree_ptr->callbacks_ptr->compare_fn(node_ptr->data_ptr, query_ptr, tree_ptr->user_ptr)) {
+      // query is > node, want to go right
+      itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
+      node_ptr = node_ptr->child_ptrs[1];
+//      if (itr_ptr->up == -1) {
+//        itr_ptr->up = 0;
+//      }
+    } else {
+      // must be equal
+      itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
+      break;
+    }
+  }
+
+  if (node_ptr == 0) {
+    // node was not found; discard stack and return invalid iterator
+    itr_ptr->depth = 0;
+  }
+
+  return itr_ptr;
+}
+
+avl_tree_iterator_ptr_t avl_tree_iterator_leftmost(avl_tree_ptr_t tree_ptr) {
+  return avl_tree_iterator_dive(tree_ptr, 0);
+}
+
+avl_tree_iterator_ptr_t avl_tree_iterator_rightmost(avl_tree_ptr_t tree_ptr) {
+  return avl_tree_iterator_dive(tree_ptr, 1);
+}
+
+bool avl_tree_iterator_valid(avl_tree_iterator_ptr_t itr_ptr) {
+  return itr_ptr->depth > 0 && itr_ptr->nonce == itr_ptr->tree_ptr->nonce;
+}
+
+void avl_tree_iterator_decrement(avl_tree_iterator_ptr_t itr_ptr) {
+  if (!avl_tree_iterator_valid(itr_ptr)) {
+    // error
+    return;
+  }
+
+  avl_tree_node_t *node_ptr = itr_ptr->node_ptrs[itr_ptr->depth - 1];
+
+  // if node has right child, find left-most child of that subtree
+  if (node_ptr->child_ptrs[0]) {
+    node_ptr = node_ptr->child_ptrs[0];
+    itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
+
+    avl_tree_node_t *left_ptr = node_ptr->child_ptrs[1];
+    while (left_ptr) {
+      node_ptr = left_ptr;
+      itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
+      left_ptr = node_ptr->child_ptrs[1];
+    }
+
+    return;
+  }
+
+  // if node is left child of parent, return to parent
+  if (itr_ptr->depth > 1 && itr_ptr->node_ptrs[itr_ptr->depth - 2]->child_ptrs[1] == itr_ptr->node_ptrs[itr_ptr->depth - 1]) {
+    itr_ptr->depth--;
+    return;
+  }
+
+  // node must be right child of parent, follow chain until node is left child parent, or the root
+  while (itr_ptr->depth > 1 && itr_ptr->node_ptrs[itr_ptr->depth - 2]->child_ptrs[0] == itr_ptr->node_ptrs[itr_ptr->depth - 1]) {
+    itr_ptr->depth--;
+  }
+  if (itr_ptr->depth > 0) {
+    itr_ptr->depth--;
+  }
+}
+
+void avl_tree_iterator_increment(avl_tree_iterator_ptr_t itr_ptr) {
+  if (!avl_tree_iterator_valid(itr_ptr)) {
+    // error
+    return;
+  }
+
+  avl_tree_node_t *node_ptr = itr_ptr->node_ptrs[itr_ptr->depth - 1];
+
+  // if node has right child, find left-most child of that subtree
+  if (node_ptr->child_ptrs[1]) {
+    node_ptr = node_ptr->child_ptrs[1];
+    itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
+
+    avl_tree_node_t *left_ptr = node_ptr->child_ptrs[0];
+    while (left_ptr) {
+      node_ptr = left_ptr;
+      itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
+      left_ptr = node_ptr->child_ptrs[0];
+    }
+
+    return;
+  }
+
+  // if node is left child of parent, return to parent
+  if (itr_ptr->depth > 1 && itr_ptr->node_ptrs[itr_ptr->depth - 2]->child_ptrs[0] == itr_ptr->node_ptrs[itr_ptr->depth - 1]) {
+    itr_ptr->depth--;
+    return;
+  }
+
+  // node must be right child of parent, follow chain until node is left child parent, or the root
+  while (itr_ptr->depth > 1 && itr_ptr->node_ptrs[itr_ptr->depth - 2]->child_ptrs[1] == itr_ptr->node_ptrs[itr_ptr->depth - 1]) {
+     itr_ptr->depth--;
+  }
+  if (itr_ptr->depth > 0) {
+    itr_ptr->depth--;
+  }
+}
+
+void *avl_tree_iterator_dereference(avl_tree_iterator_ptr_t itr_ptr) {
+  if (avl_tree_iterator_valid(itr_ptr)) {
+    return itr_ptr->node_ptrs[itr_ptr->depth - 1]->data_ptr;
+  }
+
+  return NULL;
+}
+
+void avl_tree_iterator_destroy(avl_tree_iterator_ptr_t itr_ptr) {
+  if (itr_ptr == itr_ptr->tree_ptr->head_itr_ptr) {
+    // iterator is head of tree
+    if (itr_ptr->next_itr_ptr) {
+      itr_ptr->next_itr_ptr->prev_itr_ptr = NULL;
+    }
+    itr_ptr->tree_ptr->head_itr_ptr = itr_ptr->next_itr_ptr;
+  } else {
+    itr_ptr->prev_itr_ptr->next_itr_ptr = NULL;
+    if (itr_ptr->next_itr_ptr) {
+      itr_ptr->next_itr_ptr->prev_itr_ptr = itr_ptr->prev_itr_ptr;
+    }
+  }
+
+  itr_ptr->tree_ptr->callbacks_ptr->free_fn(itr_ptr);
 }
 
 // ----------------------------------------------------------------------------

@@ -76,12 +76,50 @@ void avl_tree_destroy(avl_tree_ptr_t);
 
 // ----------------------------------------------------------------------------
 //
+// Iterator API
+//
+// ----------------------------------------------------------------------------
+
+// handle for an iterator, an opaque struct that can be used to traverse the tree
+struct avl_tree_iterator;
+typedef struct avl_tree_iterator *avl_tree_iterator_ptr_t;
+
+// like avl_tree_find, but returns an iterator
+// iterators can be free using avl_tree_free_iterator
+avl_tree_iterator_ptr_t avl_tree_find_iterator(avl_tree_ptr_t, void *query_ptr);
+
+// returns an iterator to the left-most node in the tree
+avl_tree_iterator_ptr_t avl_tree_iterator_leftmost(avl_tree_ptr_t tree_ptr);
+
+// returns an iterator to the right-most node in the tree
+avl_tree_iterator_ptr_t avl_tree_iterator_rightmost(avl_tree_ptr_t tree_ptr);
+
+// is an iterator actually valid?
+bool avl_tree_iterator_valid(avl_tree_iterator_ptr_t);
+
+// decrement iterator; in place
+void avl_tree_iterator_decrement(avl_tree_iterator_ptr_t);
+
+// increment iterator; in place
+void avl_tree_iterator_increment(avl_tree_iterator_ptr_t);
+
+// return the data pointer currently referenced by an iterator
+void *avl_tree_iterator_dereference(avl_tree_iterator_ptr_t);
+
+// free an iterator returned by avl_tree_find_iterator
+void avl_tree_iterator_destroy(avl_tree_iterator_ptr_t);
+
+// ----------------------------------------------------------------------------
+//
 // Debug API
 //
 // ----------------------------------------------------------------------------
 
 // callback to print a line of output from avl_tree_print
 typedef void (*avl_tree_print_fn_t)(void *data_ptr, int balance, int depth);
+
+// callback to print a line of output from avl_tree_iterator_print
+typedef void (*avl_tree_iterator_print_fn_t)(void *data_ptr, int depth);
 
 // print an AVL tree
 void avl_tree_print(avl_tree_ptr_t, avl_tree_print_fn_t print_fn);
