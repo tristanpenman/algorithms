@@ -535,7 +535,7 @@ void avl_tree_iterator_decrement(avl_tree_iterator_ptr_t itr_ptr) {
 
   avl_tree_node_t *node_ptr = itr_ptr->node_ptrs[itr_ptr->depth - 1];
 
-  // if node has right child, find left-most child of that subtree
+  // if node has left child, find right-most child of that subtree
   if (node_ptr->child_ptrs[0]) {
     node_ptr = node_ptr->child_ptrs[0];
     itr_ptr->node_ptrs[itr_ptr->depth++] = node_ptr;
@@ -550,16 +550,17 @@ void avl_tree_iterator_decrement(avl_tree_iterator_ptr_t itr_ptr) {
     return;
   }
 
-  // if node is left child of parent, return to parent
+  // if node is right child of parent, return to parent
   if (itr_ptr->depth > 1 && itr_ptr->node_ptrs[itr_ptr->depth - 2]->child_ptrs[1] == itr_ptr->node_ptrs[itr_ptr->depth - 1]) {
     itr_ptr->depth--;
     return;
   }
 
-  // node must be right child of parent, follow chain until node is left child parent, or the root
+  // node must be left child of parent, follow chain until node is right child parent, or the root
   while (itr_ptr->depth > 1 && itr_ptr->node_ptrs[itr_ptr->depth - 2]->child_ptrs[0] == itr_ptr->node_ptrs[itr_ptr->depth - 1]) {
     itr_ptr->depth--;
   }
+  // then go up one level
   if (itr_ptr->depth > 0) {
     itr_ptr->depth--;
   }
@@ -598,6 +599,7 @@ void avl_tree_iterator_increment(avl_tree_iterator_ptr_t itr_ptr) {
   while (itr_ptr->depth > 1 && itr_ptr->node_ptrs[itr_ptr->depth - 2]->child_ptrs[1] == itr_ptr->node_ptrs[itr_ptr->depth - 1]) {
      itr_ptr->depth--;
   }
+  // then go up one level
   if (itr_ptr->depth > 0) {
     itr_ptr->depth--;
   }
