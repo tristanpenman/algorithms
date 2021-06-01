@@ -1,0 +1,6 @@
+require 'pgm/edge'
+require 'pgm/model'
+require 'pgm/node'
+require 'pgm/printer'
+require 'pgm/tabular_cpd'
+require 'pgm/variable'
