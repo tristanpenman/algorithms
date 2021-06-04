@@ -8,10 +8,6 @@ In [coding-interview-book](./coding-interview-book) you'll find solutions for co
 
 Solutions for real interview questions can be found in [real-interviews](./real-interviews). These are all written in C++.
 
-## Partial Persistence
-
-Under [partial-persistence](./partial-persistence) you'll find a Ruby implementation of a partially persistent tree, based on lectures from MIT's course on [Advanced Data Structures](https://courses.csail.mit.edu/6.851/spring14/lectures/). There is also an incomplete C++ implementation, used mostly for reference.
-
 ## ACM Coding Challenges
 
 Solutions for the 2007 ACM Coding Challenges can be found in [acm-2007](./acm-2007). These are all written in Python. They may not be compatible with Python 3...
