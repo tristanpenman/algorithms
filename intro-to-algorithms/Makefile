@@ -1,2 +1,2 @@
-MaxSubarray: MaxSubarray.cpp
-	$(CXX) -std=c++17 -o MaxSubarray MaxSubarray.cpp
+MaxSubArray: MaxSubArray.cpp
+	$(CXX) -std=c++17 -o MaxSubArray MaxSubArray.cpp

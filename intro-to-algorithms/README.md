@@ -4,17 +4,17 @@ Algorithms based on pseudocode from the book Introduction to Algorithms (aka CLR
 
 ## Max Subarray
 
-Given an array of integers, find a subarray that when summed, has the greatest sum of all possible subarrays:
+Given an array of integers, find a sub-array that when summed, has the greatest sum of all possible sub-arrays:
 
     make
-    ./MaxSubarray 3 4 1 -4 3 -3
+    ./MaxSubArray 3 4 1 -4 3 -3
 
 ### Expected Output
 
-    $ ./MaxSubarray 3 4 1 -4 3 -3
-    Looking for greatest subarray in:
+    $ ./MaxSubArray 3 4 1 -4 3 -3
+    Looking for greatest sub-array in:
       3 4 1 -4 3 -3
-    Greatest subarray:
+    Greatest sub-array:
       3 4 1
 
 ## Related

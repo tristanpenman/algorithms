@@ -4,26 +4,26 @@
 
 // This internal data structure used to contain the return values at
 // various levels of recursion
-template<typename Iterator, typename Value>
-struct _max_subarray_candidate_t {
-  Iterator begin;
-  Iterator end;
+template<typename Itr, typename Value>
+struct MaxSubArrayCandidate
+{
+  Itr begin;
+  Itr end;
   Value value;
 };
 
 // Template method that determines the maximum subarray that crosses
 // the mid-point in a given range
-template<typename Iterator, typename Value>
-_max_subarray_candidate_t<Iterator, Value> _max_subarray_crossover(
-    Iterator begin, Iterator middle, Iterator end) {
+template<typename Itr, typename Value>
+MaxSubArrayCandidate<Itr, Value> maxSubArrayCrossover(Itr begin, Itr middle, Itr end)
+{
   if (end - begin == 1) {
-    return (struct _max_subarray_candidate_t<Iterator, Value>)
-      {begin, end, *begin};
+    return {begin, end, *begin};
   }
 
-  Iterator itr = middle;
-  Iterator left_itr = middle;
-  Iterator right_itr = middle;
+  Itr itr = middle;
+  Itr left_itr = middle;
+  Itr right_itr = middle;
 
   int left_sum = 0;
   int right_sum = 0;
@@ -56,33 +56,31 @@ _max_subarray_candidate_t<Iterator, Value> _max_subarray_crossover(
     }
   }
 
-  return (struct _max_subarray_candidate_t<Iterator, Value>)
-    {left_itr, right_itr + 1, left_sum + right_sum};
+  return {left_itr, right_itr + 1, left_sum + right_sum};
 }
 
 // Internal template method that recursively searches for the maximum
 // subarray in a given range
-template<typename Iterator, typename Value>
-_max_subarray_candidate_t<Iterator, Value> _max_subarray(Iterator begin, Iterator end) {
-  typedef struct _max_subarray_candidate_t<Iterator, Value> Candidate;
-
+template<typename Itr, typename Value>
+MaxSubArrayCandidate<Itr, Value> recursiveMaxSubArray(Itr begin, Itr end)
+{
   if (begin == end) {
     // Range is empty
-    return (Candidate){begin, end, 0};
+    return {begin, end, 0};
   } else if (begin + 1 == end) {
     // Range contains just one element
-    return (Candidate){begin, end, *begin};
+    return {begin, end, *begin};
   }
 
   // Find middle of container
-  Iterator middle = begin + (end - begin) / 2;
+  auto middle = begin + (end - begin) / 2;
 
   // Find maximum subarrays either side of middle element
-  Candidate left = _max_subarray<Iterator, Value>(begin, middle);
-  Candidate right = _max_subarray<Iterator, Value>(middle, end);
+  auto left = recursiveMaxSubArray<Itr, Value>(begin, middle);
+  auto right = recursiveMaxSubArray<Itr, Value>(middle, end);
 
   // Find maximum subarray that crosses middle element
-  Candidate crossover = _max_subarray_crossover<Iterator, Value>(begin, middle, end);
+  auto crossover = maxSubArrayCrossover<Itr, Value>(begin, middle, end);
 
   if (left.begin != left.end &&
       left.value >= right.value && left.value >= crossover.value) {
@@ -102,9 +100,11 @@ _max_subarray_candidate_t<Iterator, Value> _max_subarray(Iterator begin, Iterato
 
 // Template method that kicks off a recursive search for the
 // maximum subarray in a given range, as defined by two iterators
-template<typename Iterator, typename Value>
-std::pair<Iterator, Iterator> max_subarray(Iterator begin, Iterator end) {
-  _max_subarray_candidate_t<Iterator, Value> result = _max_subarray<Iterator, Value>(begin, end);
+template<typename Itr, typename Value>
+std::pair<Itr, Itr> maxSubArray(Itr begin, Itr end)
+{
+  auto result = recursiveMaxSubArray<Itr, Value>(begin, end);
+
   return make_pair(result.begin, result.end);
 }
 
@@ -128,15 +128,14 @@ int main(int argc, char** argv) {
   std::cerr << std::endl;
 
   // Make things prettier
-  typedef std::vector<int>::const_iterator Iterator;
-  typedef std::pair<Iterator, Iterator> Result;
+  typedef std::vector<int>::const_iterator Itr;
 
   // Find begin and end iterators for greatest subarray
-  Result result = max_subarray<Iterator, int>(values.begin(), values.end());
+  auto result = maxSubArray<Itr, int>(values.begin(), values.end());
 
   std::cerr << "Greatest subarray:" << std::endl;
   std::cerr << "  ";
-  for (Iterator itr = result.first; itr != result.second; itr++) {
+  for (Itr itr = result.first; itr != result.second; itr++) {
     std::cerr << *itr << " ";
   }
   std::cerr << std::endl;
