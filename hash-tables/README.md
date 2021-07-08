@@ -9,7 +9,7 @@ There is a hash table implemented in C++, using open addressing. The example use
 Compile and run using:
 
     make
-    ./OpenHashTable
+    ./OpenAddressing
 
 Expected output:
 
