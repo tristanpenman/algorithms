@@ -157,7 +157,7 @@ static void avl_tree_node_print(avl_tree_node_t *node_ptr, avl_tree_print_fn_t p
 static bool avl_tree_insert_empty(avl_tree_ptr_t tree_ptr, void *data_ptr) {
   avl_tree_node_t *node_ptr = tree_ptr->callbacks_ptr->malloc_fn(sizeof(avl_tree_node_t));
   if (node_ptr == NULL) {
-    // TODO: error
+    tree_ptr->callbacks_ptr->error_fn("out of memory");
     return false;
   }
 
@@ -277,7 +277,7 @@ void avl_tree_iterator_init(avl_tree_iterator_ptr_t itr_ptr, avl_tree_ptr_t tree
 avl_tree_iterator_ptr_t avl_tree_iterator_dive(avl_tree_ptr_t tree_ptr, int direction) {
   avl_tree_iterator_ptr_t itr_ptr = tree_ptr->callbacks_ptr->malloc_fn(sizeof(avl_tree_iterator_t));
   if (itr_ptr == NULL) {
-    // error
+    tree_ptr->callbacks_ptr->error_fn("out of memory");
     return NULL;
   }
 
@@ -301,7 +301,7 @@ avl_tree_iterator_ptr_t avl_tree_iterator_dive(avl_tree_ptr_t tree_ptr, int dire
 avl_tree_ptr_t avl_tree_create(const avl_tree_callbacks_t *callbacks_ptr, void *user_ptr) {
   avl_tree_ptr_t tree_ptr = (avl_tree_ptr_t) callbacks_ptr->malloc_fn(sizeof(avl_tree_t));
   if (tree_ptr == NULL) {
-    // TODO: error
+    tree_ptr->callbacks_ptr->error_fn("out of memory");
     return NULL;
   }
 
@@ -477,7 +477,7 @@ void avl_tree_destroy(avl_tree_ptr_t tree_ptr) {
 avl_tree_iterator_ptr_t avl_tree_find_iterator(avl_tree_ptr_t tree_ptr, void *query_ptr) {
   avl_tree_iterator_ptr_t itr_ptr = tree_ptr->callbacks_ptr->malloc_fn(sizeof(avl_tree_iterator_t));
   if (itr_ptr == NULL) {
-    // error
+    tree_ptr->callbacks_ptr->error_fn("out of memory");
     return NULL;
   }
 
@@ -522,7 +522,7 @@ bool avl_tree_iterator_valid(avl_tree_iterator_ptr_t itr_ptr) {
 
 void avl_tree_iterator_decrement(avl_tree_iterator_ptr_t itr_ptr) {
   if (!avl_tree_iterator_valid(itr_ptr)) {
-    // error
+    itr_ptr->tree_ptr->callbacks_ptr->error_fn("invalid iterator");
     return;
   }
 
@@ -561,7 +561,7 @@ void avl_tree_iterator_decrement(avl_tree_iterator_ptr_t itr_ptr) {
 
 void avl_tree_iterator_increment(avl_tree_iterator_ptr_t itr_ptr) {
   if (!avl_tree_iterator_valid(itr_ptr)) {
-    // error
+    itr_ptr->tree_ptr->callbacks_ptr->error_fn("invalid iterator");
     return;
   }
 

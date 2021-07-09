@@ -26,6 +26,8 @@ typedef void (*avl_tree_release_fn_t)(void *data_ptr, void *user_ptr);
 // callback used to apply an operation to the data associated with a node
 typedef bool (*avl_tree_apply_fn_t)(void *data_ptr, void *user_ptr);
 
+typedef void (*avl_tree_error_fn_t)(const char *message);
+
 // convenience data structure
 // allows callbacks to be swapped out dynamically
 typedef struct {
@@ -33,6 +35,7 @@ typedef struct {
   avl_tree_free_fn_t free_fn;
   avl_tree_compare_fn_t compare_fn;
   avl_tree_release_fn_t release_fn;
+  avl_tree_error_fn_t error_fn;
 } avl_tree_callbacks_t;
 
 // ----------------------------------------------------------------------------

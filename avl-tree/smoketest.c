@@ -35,6 +35,11 @@ static void release(void *data_ptr, void *user_ptr) {
   free(data_ptr);
 }
 
+static void error(const char *message) {
+  printf("Error: %s\n", message);
+  exit(1);
+}
+
 static bool apply_until_8(void *data_ptr, void *user_ptr) {
   printf("APPLYING: %d\n", ((data_t *) data_ptr)->value);
   return ((data_t *) data_ptr)->key != 8;
@@ -44,7 +49,8 @@ static const avl_tree_callbacks_t callbacks = {
     malloc,
     free,
     compare,
-    release
+    release,
+    error
 };
 
 int main(int argc, char **argv) {

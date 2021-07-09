@@ -35,11 +35,17 @@ static void release(void *data_ptr, void *user_ptr) {
   free(data_ptr);
 }
 
+static void error(const char *message) {
+  printf("Error: %s\n", message);
+  exit(1);
+}
+
 static const avl_tree_callbacks_t callbacks = {
     malloc,
     free,
     compare,
-    release
+    release,
+    error
 };
 
 int main(int argc, char **argv) {
