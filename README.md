@@ -30,4 +30,5 @@ Finally, there are various experiments, grouped by the kind of algorithm or data
 
 * [Hash Tables](./hash-tables)
 * [Heaps](./heaps)
+* [Matrix Multiplication](./matrix-multiplication)
 * [Sorting](./sorting)
