@@ -1,9 +1,9 @@
-CXX_FLAGS=-std=c++17
+CXX_FLAGS=-std=c++17 -O2
 
-all: Sequential Multithreaded1 Multithreaded2 Multithreaded3
+all: Sequential1 Multithreaded1 Multithreaded2 Multithreaded3
 
-Sequential: Sequential.cpp Matrix.h
-	$(CXX) $(CXX_FLAGS) Sequential.cpp -o Sequential
+Sequential1: Sequential1.cpp Matrix.h
+	$(CXX) $(CXX_FLAGS) Sequential1.cpp -o Sequential1
 
 Multithreaded1: Multithreaded1.cpp Matrix.h
 	$(CXX) $(CXX_FLAGS) Multithreaded1.cpp -o Multithreaded1
@@ -15,4 +15,4 @@ Multithreaded3: Multithreaded3.cpp Matrix.h Queue.h
 	$(CXX) $(CXX_FLAGS) Multithreaded3.cpp -o Multithreaded3
 
 clean:
-	$(RM) *.o Sequential Multithreaded1 Multithreaded2 Multithreaded3
+	$(RM) *.o Sequential1 Sequential2 Multithreaded1 Multithreaded2 Multithreaded3

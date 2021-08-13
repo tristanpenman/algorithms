@@ -1,4 +1,5 @@
 #include <cassert>
+#include <chrono>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -6,6 +7,7 @@
 #include "Matrix.h"
 
 using namespace std;
+using namespace std::chrono;
 
 template<typename T>
 struct Task
@@ -47,7 +49,8 @@ void multiply_matrices(const Matrix<T> &matrix_a, const Matrix<T> &matrix_b, Mat
   // check output matrix size
   const auto m_a = matrix_a.rows();
   const auto n_b = matrix_b.columns();
-  assert(matrix_c.rows() == matrix_b.columns());
+  assert(matrix_c.rows() == matrix_a.rows());
+  assert(matrix_c.columns() == matrix_b.columns());
 
   // track worker threads
   vector<thread> workers;
@@ -76,22 +79,11 @@ void multiply_matrices(const Matrix<T> &matrix_a, const Matrix<T> &matrix_b, Mat
   }
 }
 
-template<typename T>
-ostream& operator<<(ostream &os, const Matrix<T> &matrix)
+int usage(char **argv)
 {
-  for (int m = 0; m < matrix.rows(); m++) {
-    for (int n = 0; n < matrix.columns(); n++) {
-      os << matrix.get(m, n) << " ";
-    }
-    os << endl;
-  }
-
-  return os;
-}
-
-int usage(char *argv0)
-{
-  cout << argv0 << " <M1> <N1/M2> <N2> [seed]" << endl;
+  cout << endl;
+  cout << "Usage:" << endl;
+  cout << "  " << argv[0] << " <M1> <N1/M2> <N2> [seed]" << endl;
   cout << endl;
   cout << "Multiples a random M1xN1 matrix by a random M2xN2 matrix" << endl;
 
@@ -100,50 +92,58 @@ int usage(char *argv0)
 
 int main(int argc, char **argv)
 {
+  if (argc == 1) {
+    return usage(argv);
+  }
+
   if (argc != 4 && argc != 5) {
     cout << "Invalid argument count: " << argc << endl;
-    return usage(argv[0]);
+    return usage(argv);
   }
 
   int m_a = atoi(argv[1]);
   if (m_a <= 0) {
     cout << "Argument M1 is invalid" << endl;
-    return usage(argv[0]);
+    return usage(argv);
   }
 
   int n_a = atoi(argv[2]);
   if (n_a <= 0) {
     cout << "Argument N1/M2 is invalid" << endl;
-    return usage(argv[0]);
+    return usage(argv);
   }
 
   int n_b = atoi(argv[3]);
   if (n_b <= 0) {
     cout << "Argument N2 is invalid" << endl;
-    return usage(argv[0]);
+    return usage(argv);
   }
 
-  int seed = 0;
   if (argc == 5) {
-    seed = atoi(argv[4]);
+    srand(atoi(argv[4]));
   }
-
-  srand(seed);
 
   Matrix<double> matrix_a(m_a, n_a);
-  matrix_a.randomise(0, 100);
-  cout << "Matrix A:" << endl;
-  cout << matrix_a << endl;
+  matrix_a.randomise(-100, 100);
 
   Matrix<double> matrix_b(n_a, n_b);
-  matrix_b.randomise(0, 100);
-  cout << "Matrix B:" << endl;
-  cout << matrix_b << endl;
+  matrix_b.randomise(-100, 100);
 
   Matrix<double> matrix_c(m_a, n_b);
+  auto start = high_resolution_clock::now();
   multiply_matrices(matrix_a, matrix_b, matrix_c);
+  auto stop = high_resolution_clock::now();
+  auto duration = duration_cast<microseconds>(stop - start);
+  cout << "Duration: " << duration.count() << " microseconds (" << (double(duration.count()) / 1000000.0f) << " seconds)" << endl;
+
+#ifdef DEBUG
+  cout << "Matrix A:" << endl;
+  cout << matrix_a << endl;
+  cout << "Matrix B:" << endl;
+  cout << matrix_b << endl;
   cout << "Matrix C:" << endl;
   cout << matrix_c;
+#endif
 
   return 0;
 }

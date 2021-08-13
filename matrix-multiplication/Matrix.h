@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <iostream>
 
 template<typename T>
 class Matrix
@@ -58,3 +59,16 @@ private:
 
   T* m_values;
 };
+
+template<typename T>
+std::ostream& operator<<(std::ostream &os, const Matrix<T> &matrix)
+{
+  for (int m = 0; m < matrix.rows(); m++) {
+    for (int n = 0; n < matrix.columns(); n++) {
+      os << matrix.get(m, n) << " ";
+    }
+    os << std::endl;
+  }
+
+  return os;
+}
