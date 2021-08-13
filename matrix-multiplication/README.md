@@ -14,3 +14,11 @@ This example builds on the Sequential case, by creating one thread per output ce
 
 We can improve the multi-threaded implementation in a number of ways. A simple improvement is to increase how much work each thread has to do, in this case, by having each thread compute one or more rows of the output matrix. The number of rows per thread is configured using a command line argument.
 
+## Multi-threaded case 3 - n rows per _task_, with a fixed number of worker threads
+
+In the previous two examples, the number of threads was tied to the size of the output. This is more efficient, but depends on a careful choice of `<rows-per-thread>` to ensure that the optimal number of threads are created. For example, on a six-core CPU with hyper-threading we would typically target 12 threads.
+
+Instead of creating one thread for each piece of work to be completed, we can instead use a fixed number of worker threads, specified as a command line argument. Then, each piece of work can be represented as a task in a queue, and the worker threads fetch tasks from the queue until there are none remaining.
+
+As in case 2, the number of rows per task is specified using a command line argument - this determines the size of each task. To govern access to the queue, we use a simple mutex.
+
