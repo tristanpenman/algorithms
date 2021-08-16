@@ -26,16 +26,25 @@ public:
 
   T get(int row, int column) const
   {
-    return m_values[row * m_columns + column];
+    if (row < m_rows && column < m_columns) {
+      return m_values[row * m_columns + column];
+    } else {
+      return 0;
+    }
+  }
+
+  void randomise(T min, T max, int m, int n)
+  {
+    for (int i = 0; i < m; i++) {
+      for (int j = 0; j < n; j++) {
+        m_values[i * m_columns + j] = random_value(min, max);
+      }
+    }
   }
 
   void randomise(T min, T max)
   {
-    for (int i = 0; i < m_rows; i++) {
-      for (int j = 0; j < m_columns; j++) {
-        m_values[i * m_columns + j] = random_value(min, max);
-      }
-    }
+    randomise(min, max, m_rows, m_columns);
   }
 
   int rows() const

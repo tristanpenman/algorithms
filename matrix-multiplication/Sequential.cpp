@@ -1,3 +1,5 @@
+// #define DEBUG
+
 #include <cassert>
 #include <chrono>
 #include <iostream>
