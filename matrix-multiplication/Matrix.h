@@ -2,6 +2,8 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <optional>
+#include <random>
 
 template<typename T>
 class Matrix
@@ -24,6 +26,11 @@ public:
     return m_columns;
   }
 
+  T* data()
+  {
+    return m_values;
+  }
+
   T get(int row, int column) const
   {
     if (row < m_rows && column < m_columns) {
@@ -33,18 +40,27 @@ public:
     }
   }
 
-  void randomise(T min, T max, int m, int n)
+  void randomise(T min, T max, int m, int n, std::optional<int> seed = {})
   {
+    std::uniform_real_distribution<T> dist(min, max);
+    std::mt19937 engine;
+    if (seed) {
+      engine.seed(*seed);
+    } else {
+      std::random_device rd;
+      engine.seed(rd());
+    }
+
     for (int i = 0; i < m; i++) {
       for (int j = 0; j < n; j++) {
-        m_values[i * m_columns + j] = random_value(min, max);
+        m_values[i * m_columns + j] = dist(engine);
       }
     }
   }
 
-  void randomise(T min, T max)
+  void randomise(T min, T max, std::optional<int> seed = {})
   {
-    randomise(min, max, m_rows, m_columns);
+    randomise(min, max, m_rows, m_columns, seed);
   }
 
   int rows() const
@@ -58,11 +74,6 @@ public:
   }
 
 private:
-  T random_value(T min, T max)
-  {
-    return min + static_cast<T>(rand()) / static_cast<T>(RAND_MAX / (max - min));
-  }
-
   int m_rows;
   int m_columns;
 

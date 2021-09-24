@@ -108,7 +108,7 @@ int usage(char **argv)
   cout << "Usage:" << endl;
   cout << "  " << argv[0] << " <M1> <N1/M2> <N2> [seed]" << endl;
   cout << endl;
-  cout << "Multiples a random M1xN1 matrix by a random M2xN2 matrix" << endl;
+  cout << "Multiplies a random M1xN1 matrix by a random M2xN2 matrix" << endl;
 
   return 1;
 }
@@ -153,18 +153,31 @@ int main(int argc, char **argv)
     return usage(argv);
   }
 
-  int seed = 0;
+  optional<int> seed;
   if (argc == 5) {
     seed = atoi(argv[4]);
+    cout << "Random seeds: " << *seed << ", " << (*seed + 1) << endl;
   }
 
-  srand(seed);
-
+  // first input matrix
   Matrix<double> matrix_a(m_a, n_a);
-  matrix_a.randomise(-100, 100);
+  matrix_a.randomise(-100, 100, seed);
 
+  if (seed) {
+    seed = *seed + 1;
+  }
+
+  // second input matrix
   Matrix<double> matrix_b(n_a, n_b);
-  matrix_b.randomise(-100, 100);
+  matrix_b.randomise(-100, 100, seed);
+
+#ifdef DEBUG
+  cout << "Matrix A:" << endl;
+  cout << matrix_a << endl;
+
+  cout << "Matrix B:" << endl;
+  cout << matrix_b << endl;
+#endif
 
   int max_rows = max(m_a, n_a);
   int max_cols = max(n_a, n_b);
@@ -176,20 +189,15 @@ int main(int argc, char **argv)
   auto start = high_resolution_clock::now();
   Matrix<double> matrix_c = multiply_matrices(matrix_a, matrix_b, 0, 0, 0, 0, size);
   auto stop = high_resolution_clock::now();
-  auto duration = duration_cast<microseconds>(stop - start);
-  cout << "Duration: " << duration.count() << " microseconds (" << (double(duration.count()) / 1000000.0f) << " seconds)" << endl;
 
 #ifdef DEBUG
-  cout << "Matrix A:" << endl;
-  cout << matrix_a << endl;
-
-  cout << "Matrix B:" << endl;
-  cout << matrix_b << endl;
-
-  cout << "Matrix C:" << endl;
   Slice<double> slice(matrix_c, 0, m_a, 0, n_b);
+  cout << "Matrix C:" << endl;
   cout << slice;
 #endif
+
+  auto duration = duration_cast<microseconds>(stop - start);
+  cout << "Duration: " << duration.count() << " microseconds (" << (double(duration.count()) / 1000000.0f) << " seconds)" << endl;
 
   return 0;
 }

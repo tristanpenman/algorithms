@@ -76,7 +76,7 @@ void multiply_matrices(const Matrix<T> &matrix_a, const Matrix<T> &matrix_b, Mat
 
     // create worker thread
     thread worker(work<T>, task);
-    workers.push_back(std::move(worker));
+    workers.push_back(move(worker));
   }
 
   // wait for all worker threads to finish
@@ -131,31 +131,47 @@ int main(int argc, char **argv)
     return usage(argv);
   }
 
+  optional<int> seed;
   if (argc == 6) {
-    srand(atoi(argv[5]));
+    seed = atoi(argv[5]);
+    cout << "Random seeds: " << *seed << ", " << (*seed + 1) << endl;
   }
 
+  // first input matrix
   Matrix<double> matrix_a(m_a, n_a);
-  matrix_a.randomise(-100, 100);
+  matrix_a.randomise(-100, 100, seed);
 
+  if (seed) {
+    seed = *seed + 1;
+  }
+
+  // second input matrix
   Matrix<double> matrix_b(n_a, n_b);
-  matrix_b.randomise(-100, 100);
-
-  Matrix<double> matrix_c(m_a, n_b);
-  auto start = high_resolution_clock::now();
-  multiply_matrices(matrix_a, matrix_b, matrix_c, rows_per_thread);
-  auto stop = high_resolution_clock::now();
-  auto duration = duration_cast<microseconds>(stop - start);
-  cout << "Duration: " << duration.count() << " microseconds (" << (double(duration.count()) / 1000000.0f) << " seconds)" << endl;
+  matrix_b.randomise(-100, 100, seed);
 
 #ifdef DEBUG
   cout << "Matrix A:" << endl;
   cout << matrix_a << endl;
   cout << "Matrix B:" << endl;
   cout << matrix_b << endl;
+#endif
+
+  // output matrix
+  Matrix<double> matrix_c(m_a, n_b);
+
+  // do the work
+  auto start = high_resolution_clock::now();
+  multiply_matrices(matrix_a, matrix_b, matrix_c, rows_per_thread);
+  auto stop = high_resolution_clock::now();
+
+#ifdef DEBUG
   cout << "Matrix C:" << endl;
   cout << matrix_c;
 #endif
+
+  // how long did it take?
+  auto duration = duration_cast<microseconds>(stop - start);
+  cout << "Duration: " << duration.count() << " microseconds (" << (double(duration.count()) / 1000000.0f) << " seconds)" << endl;
 
   return 0;
 }
