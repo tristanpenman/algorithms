@@ -1,7 +1,9 @@
+*.dSYM
 *.o
+MPI
 Multithreaded1
 Multithreaded2
-QueueBased1
+QueueBased
 Recursive1
 Recursive2
 Sequential
