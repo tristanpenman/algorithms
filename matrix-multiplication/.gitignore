@@ -1,6 +1,8 @@
 *.dSYM
 *.o
 MPI
+MPI_CUDA
+MPI_OpenCL
 Multithreaded1
 Multithreaded2
 QueueBased

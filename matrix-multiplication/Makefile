@@ -1,7 +1,18 @@
 CXX_FLAGS=-std=c++17 -O2
 MPI_CXX=mpic++
 MPI_LD_FLAGS=-lmpi
+NVCC=nvcc -ccbin=mpic++
 
+#
+# Typical locations where CUDA libraries will be found
+#
+CUDA_LD_FLAGS=\
+  -L/usr/local/cuda/lib \
+  -L/usr/local/cuda/lib64 \
+  -L/usr/local/lib \
+  -L/usr/local/lib64 \
+  -L/usr/lib/x86_64-linux-gnu \
+  -lcudart
 
 #
 # Basic and multithreaded examples will be built by default. Advanced examples will not,
@@ -10,7 +21,7 @@ MPI_LD_FLAGS=-lmpi
 
 BASIC_EXAMPLES=Sequential Recursive1 Recursive2
 MULTITHREADED_EXAMPLES=Multithreaded1 Multithreaded2 QueueBased
-ADVANCED_EXAMPLES=MPI
+ADVANCED_EXAMPLES=MPI MPI_CUDA
 
 all: $(BASIC_EXAMPLES) $(MULTITHREADED_EXAMPLES)
 
@@ -55,3 +66,7 @@ QueueBased: QueueBased.cpp Matrix.h Queue.h
 
 MPI: MPI.cpp Matrix.h
 	$(MPI_CXX) $(CXX_FLAGS) -o MPI MPI.cpp $(MPI_LD_FLAGS)
+
+MPI_CUDA: MPI_CUDA.cpp MPI_CUDA_K.cu Matrix.h
+	$(NVCC) -o MPI_CUDA_K.o -c MPI_CUDA_K.cu
+	$(MPI_CXX) $(CXX_FLAGS) -o MPI_CUDA MPI_CUDA.cpp MPI_CUDA_K.o $(CUDA_LD_FLAGS) $(MPI_LD_FLAGS)

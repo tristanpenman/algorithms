@@ -107,3 +107,17 @@ Here the option `-n 2` determines how many processes to spawn. Here is example o
     -8847.99 -7100.57 1506.46 2435.57
 
     Duration: 158 microseconds (0.000158 seconds)
+
+### MPI + CUDA
+
+Now we'll build on the previous example using CUDA, NVIDIA's proprietary GPU programming interface. Like the previous example, the computation can be spread across multiple nodes, but now the individual matrix multiplications are performed on the GPU. The drawback of using CUDA is that it is limited to systems running NVIDIA GPUs.
+
+To compile this example, you will need to run `make` separately:
+
+    make MPI_CUDA
+
+Then you can run it with `mpirun`:
+
+    mpirun -n 2 ./MPI 8 8 8
+
+When you run this example, it will first compute the result using the GPU, then it will compare it to a result computed using the naive sequential method.

@@ -73,6 +73,23 @@ public:
     m_values[row * m_columns + column] = value;
   }
 
+  bool operator==(const Matrix &rhs)
+  {
+    if (rhs.m_rows != m_rows || rhs.m_columns != m_columns) {
+      return false;
+    }
+
+    for (int i = 0; i < m_rows; i++) {
+      for (int j = 0; j < m_columns; j++) {
+        if (abs(m_values[i * m_columns + j] - rhs.m_values[i * m_columns + j]) > 0.0001) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
 private:
   int m_rows;
   int m_columns;
