@@ -14,6 +14,9 @@ CUDA_LD_FLAGS=\
   -L/usr/lib/x86_64-linux-gnu \
   -lcudart
 
+OPENCL_LD_FLAGS=\
+  -lOpenCL
+
 #
 # Basic and multithreaded examples will be built by default. Advanced examples will not,
 # since they have non-standard dependencies.
@@ -21,7 +24,7 @@ CUDA_LD_FLAGS=\
 
 BASIC_EXAMPLES=Sequential Recursive1 Recursive2
 MULTITHREADED_EXAMPLES=Multithreaded1 Multithreaded2 QueueBased
-ADVANCED_EXAMPLES=MPI MPI_CUDA
+ADVANCED_EXAMPLES=MPI MPI_CUDA MPI_OpenCL
 
 all: $(BASIC_EXAMPLES) $(MULTITHREADED_EXAMPLES)
 
@@ -70,3 +73,6 @@ MPI: MPI.cpp Matrix.h
 MPI_CUDA: MPI_CUDA.cpp MPI_CUDA_K.cu Matrix.h
 	$(NVCC) -o MPI_CUDA_K.o -c MPI_CUDA_K.cu
 	$(MPI_CXX) $(CXX_FLAGS) -o MPI_CUDA MPI_CUDA.cpp MPI_CUDA_K.o $(CUDA_LD_FLAGS) $(MPI_LD_FLAGS)
+
+MPI_OpenCL: MPI_OpenCL.cpp OpenCL_Util.cpp OpenCL_Util.h Matrix.h File_Util.cpp File_Util.h
+	$(MPI_CXX) $(CXX_FLAGS) -o MPI_OpenCL MPI_OpenCL.cpp OpenCL_Util.cpp File_Util.cpp $(OPENCL_LD_FLAGS) $(MPI_LD_FLAGS)

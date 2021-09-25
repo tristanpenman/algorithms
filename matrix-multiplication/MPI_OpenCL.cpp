@@ -2,33 +2,81 @@
 
 #include <cassert>
 #include <chrono>
+#include <cstdio>
 #include <iostream>
 #include <vector>
 
 #include <mpi.h>
 
-//
-// The multiply_matrices_cuda function is declared in MPI_CUDA_K.h, and defined in MPI_CUDA_K.cu. That file
-// must be compiled using nvcc, since it contains code that will run on the GPU.
-//
-// The current file cannot be compiled using nvcc because it makes use of C++17 features. 
-//
-#include "MPI_CUDA_K.h"
-
 #include "Matrix.h"
+#include "File_Util.h"
+#include "OpenCL_Util.h"
 
 using namespace std;
 using namespace std::chrono;
 
-int usage(char **argv)
-{
-  cout << endl;
-  cout << "Usage:" << endl;
-  cout << "  " << argv[0] << " <M1> <N1/M2> <N2> [seed]" << endl;
-  cout << endl;
-  cout << "Multiples a random M1xN1 matrix by a random M2xN2 matrix" << endl;
+// OpenCL globals
+static cl_device_id     ocl_device;
+static cl_context       ocl_context;
+static cl_command_queue ocl_queue;
+static cl_program       ocl_program;
+static cl_kernel        ocl_kernel;
+static cl_mem           ocl_matrix_a;
+static cl_mem           ocl_matrix_b;
+static cl_mem           ocl_matrix_c;
 
-  return 1;
+void init_ocl()
+{
+  // init OpenCL
+  cout << "Init OpenCL" << endl;
+  ocl_device = opencl_init();
+  ocl_context = opencl_create_context(ocl_device);
+  ocl_queue = opencl_create_command_queue(ocl_device, ocl_context);
+
+  // compile kernel
+  cout << "Reading kernel source" << endl;
+  auto kernel_source = read_from_file("MPI_OpenCL.cl");
+  ocl_program = opencl_compile_program(ocl_device, ocl_context, kernel_source.c_str());
+  ocl_kernel = opencl_create_kernel(ocl_program, "multiply_matrices_k");
+  cout << "Kernel loaded" << endl;
+}
+
+void init_ocl_buffers(int m_a, int n_a, int n_b)
+{
+  ocl_matrix_a = opencl_create_buffer(ocl_context, CL_MEM_READ_ONLY, m_a * n_a * sizeof(double));
+  ocl_matrix_b = opencl_create_buffer(ocl_context, CL_MEM_READ_ONLY, n_a * n_b * sizeof(double));
+  ocl_matrix_c = opencl_create_buffer(ocl_context, CL_MEM_WRITE_ONLY, m_a * n_b * sizeof(double));
+}
+
+void multiply_matrices_ocl(const double* matrix_a, const double* matrix_b, int m_a, int n_a, int n_b, double* matrix_c)
+{
+  // copy matrices to device memory
+  OPENCL_CHECK( clEnqueueWriteBuffer(ocl_queue, ocl_matrix_a, CL_TRUE, 0, m_a * n_a * sizeof(double), matrix_a, 0, NULL, NULL) );
+  OPENCL_CHECK( clEnqueueWriteBuffer(ocl_queue, ocl_matrix_b, CL_TRUE, 0, n_a * n_b * sizeof(double), matrix_b, 0, NULL, NULL) );
+
+  // set kernel args
+  opencl_set_kernel_cl_mem_arg(ocl_kernel, ocl_matrix_a, 0);
+  opencl_set_kernel_cl_mem_arg(ocl_kernel, ocl_matrix_b, 1);
+  opencl_set_kernel_int_arg(ocl_kernel, m_a, 2);
+  opencl_set_kernel_int_arg(ocl_kernel, n_a, 3);
+  opencl_set_kernel_int_arg(ocl_kernel, n_b, 4);
+  opencl_set_kernel_cl_mem_arg(ocl_kernel, ocl_matrix_c, 5);
+
+  // overall problem size
+  const size_t global[] = {
+      (size_t) m_a,
+      (size_t) n_b
+  };
+
+  // enqueues a command to execute a kernel on a device
+  cl_event event = nullptr;
+  OPENCL_CHECK( clEnqueueNDRangeKernel(ocl_queue, ocl_kernel, 2, NULL, global, NULL, 0, NULL, &event) );
+
+  // waits on the host thread for commands identified by event objects to complete
+  OPENCL_CHECK( clWaitForEvents(1, &event) );
+
+  // enqueue commands to read from a buffer object to host memory
+  OPENCL_CHECK( clEnqueueReadBuffer(ocl_queue, ocl_matrix_c, CL_TRUE, 0, m_a * n_b * sizeof(double), matrix_c, 0, NULL, NULL) );
 }
 
 // only used for verification in this example
@@ -60,6 +108,17 @@ void multiply_matrices(const Matrix<T> &matrix_a, const Matrix<T> &matrix_b, Mat
       matrix_c.set(m, n, sum);
     }
   }
+}
+
+int usage(char **argv)
+{
+  cout << endl;
+  cout << "Usage:" << endl;
+  cout << "  " << argv[0] << " <M1> <N1/M2> <N2> [seed]" << endl;
+  cout << endl;
+  cout << "Multiples a random M1xN1 matrix by a random M2xN2 matrix" << endl;
+
+  return 1;
 }
 
 int main(int argc, char **argv)
@@ -100,7 +159,10 @@ int main(int argc, char **argv)
   // who am I?
   int host_rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &host_rank);
-  
+
+  init_ocl();
+  init_ocl_buffers(m_a, n_a, n_b);
+
   // matrices that are only used on the root node
   Matrix<double> matrix_a(m_a, n_a);
   Matrix<double> matrix_c(m_a, n_b);
@@ -160,7 +222,7 @@ int main(int argc, char **argv)
       MPI_COMM_WORLD);              // communicator
 
   // do the work
-  multiply_matrices_cuda(
+  multiply_matrices_ocl(
       matrix_a_partition.data(),
       matrix_b.data(),
       matrix_a_partition.rows(),
@@ -191,7 +253,7 @@ int main(int argc, char **argv)
     // how long did it take?
     auto duration = duration_cast<microseconds>(stop - start);
     cout << "Duration: " << duration.count() << " microseconds (" << (double(duration.count()) / 1000000.0f) << " seconds)" << endl;
-  
+
     cout << "Checking result..." << endl;
     Matrix<double> matrix_d(m_a, n_b);
     multiply_matrices(matrix_a, matrix_b, matrix_d);

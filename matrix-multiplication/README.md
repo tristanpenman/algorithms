@@ -121,3 +121,15 @@ Then you can run it with `mpirun`:
     mpirun -n 2 ./MPI 8 8 8
 
 When you run this example, it will first compute the result using the GPU, then it will compare it to a result computed using the naive sequential method.
+
+### MPI + OpenCL
+
+The final example builds upon the first MPI example by using the OpenCL to do the work for each node. This allows computation to be performed on a GPU (if present), or even on devices such as FPGAs.
+
+You will need to run `make` separately:
+
+    make MPI_OpenCL
+
+Usage is the same as the previous example.
+
+Note that, unlike the MPI + CUDA example, the `multiply_matrices_k` kernel is compiled at runtime, so the file `MPI_OpenCL.cl` must be present alongside the main executable. This would also allow the kernel to be updated or replaced without recompiling the program.
