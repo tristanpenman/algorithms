@@ -24,11 +24,14 @@ Algorithms based on pseudocode from the book [Computational Geometry](https://ww
 
 In [avl-tree](./avl-tree) you'll find C code for an AVL tree implementation that I extracted from an old project. The original code was much more complicated, because it employed mutexes to allow usage in a multi-threaded environment. The new code has been simplified, and all concurrency-related logic has been removed.
 
+## Matrix Multiplication
+
+Although matrix multiplication does not involve particularly tricky algorithms, it is interesting to look at the different ways it can be sped up in practice. In [matrix-multiplication](./matrix-multiplication) you'll find examples that range from a naive sequential implementation, to MPI-based implementations that can be distributed across multiple nodes and computed on GPUs.
+
 ## Miscellaneous
 
 Finally, there are various experiments, grouped by the kind of algorithm or data structure that I was learning about:
 
 * [Hash Tables](./hash-tables)
 * [Heaps](./heaps)
-* [Matrix Multiplication](./matrix-multiplication)
 * [Sorting](./sorting)
