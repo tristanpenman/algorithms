@@ -22,7 +22,7 @@ Algorithms based on pseudocode from the book [Computational Geometry](https://ww
 
 ## AVL Tree
 
-In [avl-tree](./avl-tree) you'll find C code for an AVL tree implementation that I extracted from an old project. The original code was much more complicated, because it employed mutexes to allow usage in a multi-threaded environment. The new code has been simplified, and all concurrency-related logic has been removed.
+In [avl-tree](./avl-tree) you'll find C code for an AVL tree implementation that I extracted from an old project. The original code was much more complicated, because it was intended to be thread-safe. The new code has been simplified, and all concurrency-related logic has been removed.
 
 ## Matrix Multiplication
 
