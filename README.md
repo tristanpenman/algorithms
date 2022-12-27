@@ -8,7 +8,6 @@ This repo contains implementations of various algorithms and data structures, mo
 - [AVL Tree](#avl-tree)
 - [Coding Interview Book](#coding-interview-book)
 - [Computational Geometry](#computational-geometry)
-- [Inference Engine](#inference-engine)
 - [Interview Questions](#interview-questions)
 - [Matrix Multiplication](#matrix-multiplication)
 - [Miscellaneous](#miscellaneous)
@@ -28,14 +27,6 @@ In [coding-interview-book](./coding-interview-book) you'll find solutions for co
 ## Computational Geometry
 
 Algorithms based on pseudocode from the book [Computational Geometry](https://www.springer.com/gp/book/9783540779735) can be found in [computational-geometry](./computational-geometry).
-
-## Inference Engine
-
-In [inference-engine](./inference-engine) you will find a compact inference engine implementation, written in Ruby. It supports three common inference algorithms:
-
-* Backward Chaining (BC)
-* Forward Chaining (FC)
-* Truth Table Checking (TT)
 
 ## Interview Questions
 
