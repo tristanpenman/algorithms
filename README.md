@@ -24,6 +24,10 @@ In [avl-tree](./avl-tree) you'll find C code for an AVL tree implementation that
 
 In [coding-interview-book](./coding-interview-book) you'll find solutions for coding interview questions from the book [Cracking the Coding Interview](http://www.crackingthecodinginterview.com/). These are all written in Java.
 
+## Compression
+
+Various compression algorithms (e.g. Huffman) can be found in [compression](./compression/).
+
 ## Computational Geometry
 
 Algorithms based on pseudocode from the book [Computational Geometry](https://www.springer.com/gp/book/9783540779735) can be found in [computational-geometry](./computational-geometry).

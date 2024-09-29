@@ -14,7 +14,7 @@
    + Find more algorithms derived from sorting
  * Compression
    + RLE compression
-   + Huffman compression
+   + ~~Huffman compression~~
    + NN-based compression
  * Graphs
    + Spanning trees

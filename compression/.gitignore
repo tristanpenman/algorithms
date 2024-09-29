@@ -1,0 +1,7 @@
+BitstreamTest
+HuffmanCompress
+HuffmanDecompress
+*.dSYM
+*.o
+*.huff
+*.out
