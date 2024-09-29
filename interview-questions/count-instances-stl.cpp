@@ -8,8 +8,8 @@ int main(int argc, char** argv) {
 
   cout << "Testing recursive binary search..." << endl;
   for (int i = 0; i < 10; i++) {
-        std::pair<int*, int*> result = equal_range(array, array + 9, i);
-        size_t count = distance(result.first, result.second);
+    std::pair<int*, int*> result = equal_range(array, array + 9, i);
+    size_t count = distance(result.first, result.second);
     cout << " " << i << ": " << count << " instances" << endl;
   }
 
